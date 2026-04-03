@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsalar | Ertan Ulutürk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 40px; }
+        .card { background: var(--bg-white); border-radius: 15px; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid #eee; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); }
+        .card-img-wrapper { width: 100%; height: 260px; overflow: hidden; position: relative; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .card:hover .card-img-wrapper img { transform: scale(1.1); }
+        .card-content { padding: 30px; }
+        .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; }
+        .card-desc { font-size: 0.95rem; color: #666; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .wp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; background-color: var(--accent-color); color: white; text-decoration: none; padding: 15px; border-radius: 8px; font-weight: 600; transition: var(--transition); width: 100%; }
+        .wp-btn:hover { background-color: #1ebe57; transform: translateY(-2px); }
+        .loader { grid-column: 1 / -1; text-align: center; padding: 50px; font-size: 1.2rem; color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Ertan Ulutürk Logo"></a>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="hakkimizda.html">Hakkımızda</a></li>
+            <li><a href="arsalar.html" class="active">Arsalar</a></li>
+            <li><a href="iletisim.html">İletişim</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-header">
+        <h1>Güncel Portföy</h1>
+        <p>Kandıra ve çevresindeki en değerli yatırımlar</p>
+    </div>
+
+    <div class="container">
+        <div id="listings" class="grid">
+            <div class="loader"><i class="fas fa-spinner fa-spin"></i> Veritabanına Bağlanılıyor...</div>
+        </div>
+    </div>
+
+    <footer class="premium-footer">
+        <div class="footer-container">
+            <div class="footer-brand"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"><p>Kandıra Gayrimenkul Yatırım Danışmanlığı.</p></div>
+            <div class="footer-links"><h4>Kurumsal</h4><ul><li><a href="index.html">Ana Sayfa</a></li><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="arsalar.html">Arsalar</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+            <div class="footer-contact"><h4>İletişim</h4><p><i class="fas fa-phone-alt"></i> +90 531 633 71 64</p></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 Ertan Ulutürk. | Powered by: <span><a href="https://www.ybg13.com" target="_blank">YBG13™</a></span></p></div>
+    </footer>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // YENİ CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwfEYe0JztVcatqsbI6vUmjizJBaSKpYQ",
+            authDomain: "messi-2704f.firebaseapp.com",
+            projectId: "messi-2704f",
+            storageBucket: "messi-2704f.firebasestorage.app",
+            messagingSenderId: "605613457448",
+            appId: "1:605613457448:web:5d3385117726fd773d751d",
+            measurementId: "G-7CXNV0Y2W0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadListings() {
+            const listingsDiv = document.getElementById('listings');
+            const q = query(collection(db, "arsalar"), orderBy("createdAt", "desc"));
+            
+            try {
+                const querySnapshot = await getDocs(q);
+                listingsDiv.innerHTML = ''; 
+                if(querySnapshot.empty) { listingsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Şu an için ilan bulunmamaktadır.</div>'; return; }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const thumbnail = (data.images && data.images.length > 0) ? data.images[0] : 'https://via.placeholder.com/600x400?text=Gorsel+Yok';
+                    
+                    // YÖNLENDİRME ARTIK INCELEME.HTML'E (ID İLE BİRLİKTE)
+                    const detailLink = `inceleme.html?id=${doc.id}`;
+
+                    listingsDiv.innerHTML += `
+                        <div class="card">
+                            <div class="card-img-wrapper"><img src="${thumbnail}" alt="${data.title}" loading="lazy"></div>
+                            <div class="card-content">
+                                <h3 class="card-title">${data.title}</h3>
+                                <p class="card-desc">${data.description}</p>
+                                <a href="${detailLink}" class="wp-btn" style="background: var(--primary-color);">
+                                    <i class="fas fa-search"></i> İlanı İncele
+                                </a>
+                            </div>
+                        </div>`;
+                });
+            } catch (error) {
+                console.error("Hata:", error);
+                listingsDiv.innerHTML = '<div style="grid-column: 1/-1; text-align:center; color:red;">Bağlantı hatası.</div>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadListings);;
+    </script>
+    
+    <script>
+        document.getElementById('mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

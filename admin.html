@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim Paneli | YBG13 Secure</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; display: flex; flex-direction: column; min-height: 100vh; }
+        #loginScreen { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 20px; margin-top: 50px; }
+        .login-box { background: white; padding: 50px 40px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; border: 1px solid #eee; position: relative; overflow: hidden; }
+        
+        /* Güvenlik Rozetleri */
+        .security-badge { position: absolute; top: 15px; left: 15px; background: #1a252f; color: #00ffcc; font-size: 0.6rem; padding: 5px 10px; border-radius: 5px; font-weight: bold; letter-spacing: 1px; display: flex; flex-direction: column; gap: 3px; text-align: left; }
+        .security-badge span { display: flex; align-items: center; gap: 5px; }
+
+        .login-box img { height: 60px; margin-bottom: 30px; filter: invert(1) brightness(0); }
+        .login-input { width: 100%; border: 2px solid #eee; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; font-size: 1.1rem; letter-spacing: 2px; transition: 0.3s; outline: none; }
+        .login-input:focus { border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .btn-login { width: 100%; background: var(--primary-color); color: white; border: none; padding: 15px; border-radius: 15px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background: var(--secondary-color); color: var(--primary-color); }
+
+        /* Aegis Uyarı Ekranı */
+        #aegisWarning { color: #e74c3c; font-weight: bold; font-size: 0.9rem; margin-top: 15px; display: none; background: #fee2e2; padding: 10px; border-radius: 10px; }
+
+        #dashboard { display: none; padding: 120px 20px 50px; flex-grow: 1; }
+        .dash-container { max-width: 1400px; margin: 0 auto; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 20px 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); margin-bottom: 30px; border: 1px solid #eee; }
+        .dash-title h1 { color: var(--primary-color); font-size: 1.5rem; }
+        .dash-title p { color: var(--secondary-color); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-logout { background: #fff0f0; color: #e74c3c; border: 1px solid #ffcccc; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        
+        .dash-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        @media screen and (max-width: 992px) { .dash-grid { grid-template-columns: 1fr; } }
+        .dash-card { background: white; padding: 35px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #eee; position: relative; overflow: hidden; }
+        .dash-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--primary-color); }
+        .dash-card.gold-line::before { background: var(--secondary-color); }
+        .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+
+        .dash-input { width: 100%; padding: 15px; border: 2px solid #f1f5f9; border-radius: 15px; background: #fafafa; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        .dash-input:focus { border-color: var(--secondary-color); background: white; }
+        textarea.dash-input { min-height: 120px; resize: vertical; }
+
+        .upload-area { border: 2px dashed #cbd5e1; background: #f8fafc; padding: 20px; text-align: center; border-radius: 15px; cursor: pointer; transition: 0.3s; color: var(--primary-color); font-weight: 600; }
+        .upload-area:hover { border-color: var(--secondary-color); background: #fdfaf0; color: var(--secondary-color); }
+        #previews { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        #previews img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .listing-box { background: #fafafa; border: 1px solid #f1f5f9; padding: 15px; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s; }
+        .listing-box:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.05); border-color: #e2e8f0; background: white; }
+        .listing-info { display: flex; align-items: center; gap: 15px; }
+        .listing-info img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; }
+        .listing-title { font-weight: 700; color: var(--primary-color); font-size: 1.1rem; }
+        .btn-delete { background: #fee2e2; color: #ef4444; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: 0.3s; font-size: 1.2rem; }
+        .btn-delete:hover { background: #ef4444; color: white; }
+
+        .custom-scroll { max-height: 600px; overflow-y: auto; padding-right: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"></a>
+        <ul class="nav-links"><li><a href="index.html">Sisteme Dön</a></li></ul>
+    </nav>
+
+<div id="loginScreen">
+    <div class="login-box">
+
+        <img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo">
+        
+        <h2 style="margin-bottom: 10px; color: var(--primary-color); font-weight: 800;">Yönetici Paneli</h2>
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 25px;">Lütfen erişim anahtarınızı doğrulayın.</p>
+
+        <input type="password" id="adminPass" class="login-input" placeholder="••••••••" autocomplete="off">
+        
+        <div id="aegisWarning"></div>
+
+        <button id="loginBtn" onclick="attemptLogin()" class="btn-login">
+            <i class="fas fa-fingerprint"></i> Kimliği Doğrula
+        </button>
+    </div>
+</div>
+
+    <div id="dashboard">
+        <div class="dash-container">
+            <div class="dash-header">
+                <div class="dash-title">
+                    <h1>Yönetim Paneli</h1>
+                    <p>Ertan Ulutürk Gayrimenkul</p>
+                </div>
+                <button onclick="logout()" class="btn-logout"><i class="fas fa-power-off"></i> Güvenli Çıkış</button>
+            </div>
+
+            <div class="dash-grid">
+                <div class="dash-card gold-line">
+                    <h2 class="card-title"><i class="fas fa-plus-circle" style="color: var(--secondary-color);"></i> Yeni İlan Ekle</h2>
+                    <input type="text" id="newName" class="dash-input" placeholder="İlan Başlığı (Örn: Merkezde Arsa)">
+                    <textarea id="newDesc" class="dash-input" placeholder="İlanın tüm detaylarını buraya yazın..."></textarea>
+                    
+                    <input type="file" id="fileInp" multiple accept="image/*" style="display: none;">
+                    <div class="upload-area" onclick="document.getElementById('fileInp').click()">
+                        <i class="fas fa-cloud-upload-alt text-2xl mb-2" style="font-size: 2rem;"></i><br>
+                        Görselleri Seç (Max 10)
+                    </div>
+                    <div id="previews"></div>
+
+                    <button onclick="saveProduct(event)" class="btn-login" style="margin-top: 20px; background: var(--primary-color);">
+                        <i class="fas fa-save"></i> Sistemi Güncelle ve Kaydet
+                    </button>
+                </div>
+
+                <div class="dash-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h2 class="card-title" style="border: none; margin: 0; padding: 0;"><i class="fas fa-box-open"></i> Aktif Portföy</h2>
+                        <button onclick="loadProducts()" style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; color: #64748b; transition: 0.3s;"><i class="fas fa-sync-alt"></i> Yenile</button>
+                    </div>
+                    <div id="adminProductGrid" class="custom-scroll"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="premium-footer" style="padding: 30px 20px; margin-top: auto; border-top: 1px solid #e2e8f0;">
+        <div class="footer-bottom" style="display: flex; justify-content: space-between; max-width: 1400px; margin: 0 auto; align-items: center;">
+            <p style="margin: 0; color: #64748b;">© 2026 Tüm Sistemler Aktif. Korumalı Ağ.</p>
+            <a href="https://www.ybg13.com" target="_blank" style="text-decoration: none; display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 12px; border: 1px solid #eee;">
+                <span style="font-size: 0.7rem; font-weight: bold; color: #94a3b8; letter-spacing: 1px;">ALTYAPI</span>
+                <span style="font-weight: 900; color: var(--primary-color);">YBG13™</span>
+            </a>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, deleteDoc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwfEYe0JztVcatqsbI6vUmjizJBaSKpYQ",
+            authDomain: "messi-2704f.firebaseapp.com",
+            projectId: "messi-2704f",
+            storageBucket: "messi-2704f.firebasestorage.app",
+            messagingSenderId: "605613457448",
+            appId: "1:605613457448:web:5d3385117726fd773d751d"
+        };
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.fs = { collection, addDoc, getDocs, deleteDoc, doc, getDoc, query, orderBy, serverTimestamp };
+    </script>
+
+    <script>
+        // ==========================================
+        // 🛡️ Aegis Web Firewall (Frontend Edition)
+        // ==========================================
+        class AegisWebFirewall {
+            constructor() {
+                this.threatThreshold = 3; // 3 hatalı girişte banla
+                this.quarantineTime = 5 * 60 * 1000; // 5 Dakika Ban
+                this.log("[Aegis Pro+ v1.5] Frontend Modülü Aktif.");
+            }
+            log(msg) { console.log(`%c${msg}`, "color: #e74c3c; font-weight: bold;"); }
+            
+            checkKarantina() {
+                const banZamani = localStorage.getItem('aegis_ban');
+                if (banZamani && Date.now() < parseInt(banZamani)) {
+                    const kalan = Math.ceil((parseInt(banZamani) - Date.now()) / 60000);
+                    return `Aegis Kalkanı Devrede: Güvenlik ihlali nedeniyle ${kalan} dakika engellendiniz.`;
+                }
+                return null;
+            }
+
+            hataliGirisKaydet() {
+                let hatalar = parseInt(localStorage.getItem('aegis_fails') || "0") + 1;
+                localStorage.setItem('aegis_fails', hatalar);
+                
+                if (hatalar >= this.threatThreshold) {
+                    localStorage.setItem('aegis_ban', Date.now() + this.quarantineTime);
+                    localStorage.removeItem('aegis_fails');
+                    this.log("Saldırı tespit edildi. IP (Tarayıcı) karantinaya alındı.");
+                    return true; // Banlandı
+                }
+                return false; // Henüz banlanmadı
+            }
+
+            basariliGiris() { localStorage.removeItem('aegis_fails'); }
+        }
+        const aegis = new AegisWebFirewall();
+
+        // ==========================================
+        // 🌌 NovaGate v4.0.0 - Quantum Vanguard
+        // ==========================================
+        class NovaGateV4 {
+            constructor() {
+                this.version = "4.0.0";
+                this.activeSessionKey = null;
+                console.log(`%c[NovaGate v${this.version}] Kuantum Zırhı Aktif.`, "color: #00ffcc; background: #000; padding: 4px;");
+            }
+            
+            async bootSequence() {
+                // AES-GCM 256-bit oturum anahtarı oluşturuluyor
+                this.activeSessionKey = await window.crypto.subtle.generateKey(
+                    { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]
+                );
+            }
+
+            // Oturum tokenini AES ile şifrele
+            async encryptSession(data) {
+                if(!this.activeSessionKey) await this.bootSequence();
+                const encoder = new TextEncoder();
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encoded = encoder.encode(JSON.stringify(data));
+                
+                const encrypted = await window.crypto.subtle.encrypt(
+                    { name: "AES-GCM", iv: iv }, this.activeSessionKey, encoded
+                );
+                
+                // Şifrelenmiş veriyi sakla
+                sessionStorage.setItem('ng4_token', btoa(String.fromCharCode(...new Uint8Array(encrypted))));
+                sessionStorage.setItem('ng4_iv', btoa(String.fromCharCode(...iv)));
+            }
+
+            async isSessionValid() {
+                const token = sessionStorage.getItem('ng4_token');
+                const ivStr = sessionStorage.getItem('ng4_iv');
+                if(!token || !ivStr || !this.activeSessionKey) return false;
+                
+                try {
+                    const bundle = Uint8Array.from(atob(token), c => c.charCodeAt(0));
+                    const iv = Uint8Array.from(atob(ivStr), c => c.charCodeAt(0));
+                    await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, this.activeSessionKey, bundle);
+                    return true; // Şifre başarıyla çözülürse yetki var demektir
+                } catch(e) { return false; }
+            }
+        }
+        const novaGate = new NovaGateV4();
+
+        // ==========================================
+        // ⚙️ Sistem İşlevleri
+        // ==========================================
+        let tempImages = [];
+
+        async function attemptLogin() {
+            const warningBox = document.getElementById('aegisWarning');
+            const btn = document.getElementById('loginBtn');
+            const passInput = document.getElementById('adminPass').value;
+
+            // 1. AEGIS: Karantina Kontrolü
+            const karantinaDurumu = aegis.checkKarantina();
+            if(karantinaDurumu) {
+                warningBox.innerText = karantinaDurumu;
+                warningBox.style.display = 'block';
+                return;
+            }
+
+            if (!passInput) return;
+            if (!window.fs) return alert('Veritabanı bağlanıyor...');
+
+            btn.innerText = "Şifreleniyor...";
+
+            try {
+                const docRef = window.fs.doc(window.db, "guvenlik", "sifreler");
+                const snap = await window.fs.getDoc(docRef);
+                
+                if (snap.exists() && snap.data().adminSifre === passInput) {
+                    aegis.basariliGiris(); // Aegis hataları sıfırlar
+                    
+                    // 2. NOVAGATE: Oturumu Şifreleyip Sakla
+                    await novaGate.encryptSession({ timestamp: Date.now(), role: "SUPER_ADMIN" });
+
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    loadProducts();
+                } else {
+                    // AEGIS: Hatalı Girişi Cezasız Bırakma (Tarpit Gecikmesi)
+                    btn.innerText = "Kimlik Doğrulanamadı!";
+                    setTimeout(() => { btn.innerText = "Giriş Yap"; }, 2000);
+                    
+                    const banlandiMi = aegis.hataliGirisKaydet();
+                    if(banlandiMi) {
+                        warningBox.innerText = "Çok fazla hatalı giriş! Aegis kalkanı sizi sistemden attı.";
+                        warningBox.style.display = 'block';
+                    } else {
+                        warningBox.innerText = "Hatalı şifre. Art arda denemeler hesabınızı kilitler.";
+                        warningBox.style.display = 'block';
+                    }
+                }
+            } catch (error) { alert("Sistem Ağ Hatası!"); }
+        }
+
+        async function logout() {
+            sessionStorage.clear(); // NovaGate tokenlerini yok et
+            document.getElementById('adminPass').value = '';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            tempImages = [];
+            document.getElementById('previews').innerHTML = '';
+        }
+
+        document.getElementById('adminPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        // --- Fotoğraf ve Kayıt İşlemleri (Öncekiyle Aynı) ---
+        document.getElementById('fileInp').onchange = (e) => {
+            const files = Array.from(e.target.files);
+            if (tempImages.length + files.length > 10) return alert('En fazla 10 adet fotoğraf!');
+            files.forEach(f => {
+                const r = new FileReader();
+                r.onload = (ev) => {
+                    tempImages.push(ev.target.result);
+                    const i = document.createElement('img'); i.src = ev.target.result;
+                    document.getElementById('previews').appendChild(i);
+                };
+                r.readAsDataURL(f);
+            });
+        };
+
+        async function saveProduct(event) {
+            // Güvenlik Duvarı Kontrolü
+            const isAuthorized = await novaGate.isSessionValid();
+            if(!isAuthorized) return logout();
+
+            const n = document.getElementById('newName').value;
+            const d = document.getElementById('newDesc').value;
+            if(!n || !d) return alert('Başlık ve açıklama zorunludur.');
+            if(tempImages.length === 0) return alert('Görsel seçimi zorunludur.');
+
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Kaydediliyor...';
+            btn.disabled = true;
+
+            try {
+                await window.fs.addDoc(window.fs.collection(window.db, "arsalar"), {
+                    title: n, description: d, images: tempImages, createdAt: window.fs.serverTimestamp()
+                });
+                document.getElementById('newName').value = ''; document.getElementById('newDesc').value = '';
+                tempImages = []; document.getElementById('previews').innerHTML = '';
+                loadProducts();
+            } catch (error) { alert("Hata oluştu."); } 
+            finally { btn.innerHTML = '<i class="fas fa-save"></i> Sistemi Güncelle ve Kaydet'; btn.disabled = false; }
+        }
+
+        async function loadProducts() {
+            const grid = document.getElementById('adminProductGrid');
+            grid.innerHTML = '<div style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin"></i></div>';
+            
+            try {
+                const q = window.fs.query(window.fs.collection(window.db, "arsalar"), window.fs.orderBy("createdAt", "desc"));
+                const snap = await window.fs.getDocs(q);
+                grid.innerHTML = '';
+                
+                if(snap.empty) { grid.innerHTML = '<p style="text-align:center; padding:20px;">Hiç ilan bulunamadı.</p>'; return; }
+
+                snap.forEach(d => {
+                    const p = d.data();
+                    const img = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/70px';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'listing-box';
+                    item.innerHTML = `
+                        <div class="listing-info">
+                            <img src="${img}" alt="Arsa">
+                            <div><span style="font-size:0.7rem; background:#e0e7ff; color:#4f46e5; padding:3px 8px; border-radius:6px; font-weight:bold;">AKTİF</span><br><span class="listing-title">${p.title}</span></div>
+                        </div>
+                        <button onclick="deleteProduct('${d.id}')" class="btn-delete"><i class="fas fa-trash-alt"></i></button>
+                    `;
+                    grid.appendChild(item);
+                });
+            } catch (error) { grid.innerHTML = '<p style="color:red; text-align:center;">Hata oluştu!</p>'; }
+        }
+
+        async function deleteProduct(id) {
+            // Güvenlik Duvarı Kontrolü
+            const isAuthorized = await novaGate.isSessionValid();
+            if(!isAuthorized) return logout();
+
+            if(confirm('Kalıcı olarak silinecek, onaylıyor musunuz?')) {
+                await window.fs.deleteDoc(window.fs.doc(window.db, "arsalar", id));
+                loadProducts();
+            }
+        }
+    </script>
+</body>
+</html>

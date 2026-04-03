@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkımızda | Ertan Ulutürk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .about-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 60px; align-items: center; }
+        /* Fotoğraf boyutu sınırlandı ve merkeze alındı */
+        .about-image { position: relative; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); max-width: 380px; margin: 0 auto; }
+        .about-image img { width: 100%; display: block; transition: var(--transition); }
+        .about-image:hover img { transform: scale(1.03); }
+        .about-image::before { content: ''; position: absolute; inset: 0; border: 3px solid var(--secondary-color); border-radius: 20px; z-index: 10; pointer-events: none; margin: 15px; }
+        .about-text h2 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 20px; }
+        .about-text h2 span { color: var(--secondary-color); }
+        .about-text p { font-size: 1.1rem; color: #555; margin-bottom: 20px; text-align: justify; }
+        @media screen and (max-width: 992px) { .about-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"></a>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="hakkimizda.html" class="active">Hakkımızda</a></li>
+            <li><a href="arsalar.html">Arsalar</a></li>
+            <li><a href="iletisim.html">İletişim</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-header"><h1>Hakkımızda</h1><p>Bizi Yakından Tanıyın</p></div>
+
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-image">
+                <img src="https://raw.githubusercontent.com/berkingcreator/ertanuluturk/main/ertan.jpeg" alt="Ertan Ulutürk" loading="lazy">
+            </div>
+            <div class="about-text">
+                <h2>Ertan Ulutürk <span>Kimdir?</span></h2>
+                <p>Kocaeli'nin gözde ilçesi Kandıra'da yıllardır gayrimenkul ve yatırım danışmanlığı yapmaktayım. Bölgenin toprak yapısına, imar durumlarına ve gelecekteki gelişim potansiyeline olan hakimiyetimle, yatırımcılarımıza en doğru yönlendirmeleri sağlıyorum.</p>
+                <p>Amacım sadece arsa satmak değil; yatırımcıların bütçesine ve hedeflerine uygun, uzun vadede kazandıracak doğru toprakları onlarla buluşturmaktır. Şeffaflık, dürüstlük ve güven ilkelerinden asla taviz vermeden çalışıyoruz.</p>
+                <div style="margin-top: 30px;"><a href="iletisim.html" class="btn-primary">Benimle İletişime Geçin</a></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="premium-footer">
+        <div class="footer-container">
+            <div class="footer-brand"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"><p>Kocaeli Kandıra bölgesindeki tarlalarınız, arsalarınız ve yatırımlarınız için en doğru adres.</p></div>
+            <div class="footer-links"><h4>Kurumsal</h4><ul><li><a href="index.html">Ana Sayfa</a></li><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="arsalar.html">Arsalar</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+            <div class="footer-links"><h4>İletişim</h4><ul><li><a href="tel:+905316337164">+90 531 633 71 64</a></li><li>Kandıra / Kocaeli</li></ul></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 Ertan Ulutürk. | Powered by: <span><a href="https://www.ybg13.com" target="_blank">YBG13™</a></span></p></div>
+    </footer>
+
+    <script>
+        document.getElementById('mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

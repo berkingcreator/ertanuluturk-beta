@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ertan Ulutürk | Kandıra Gayrimenkul</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #hero { height: 100vh; background: linear-gradient(rgba(26, 37, 47, 0.7), rgba(26, 37, 47, 0.8)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: white; padding: 0 20px; }
+        #hero h1 { font-size: 4.5rem; font-weight: 800; margin-bottom: 20px; }
+        #hero h1 span { color: var(--secondary-color); }
+        #hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 40px; color: #ddd; }
+        @media screen and (max-width: 768px) { #hero h1 { font-size: 2.8rem; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"></a>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Ana Sayfa</a></li>
+            <li><a href="hakkimizda.html">Hakkımızda</a></li>
+            <li><a href="arsalar.html">Arsalar</a></li>
+            <li><a href="iletisim.html">İletişim</a></li>
+        </ul>
+    </nav>
+
+    <header id="hero">
+        <h1>Kandıra'da Güvenilir <span>Yatırım</span></h1>
+        <p>Gayrimenkul ve arsa yatırımlarınızda Ertan Ulutürk güvencesiyle geleceğinizi sağlam temeller üzerine inşa edin.</p>
+        <a href="arsalar.html" class="btn-primary">Portföyü İncele</a>
+    </header>
+
+    <div class="container" style="padding-top: 80px;">
+        <h2 class="section-title">Bölgeden Kareler</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item"><img src="https://raw.githubusercontent.com/berkingcreator/ertanuluturk/main/foto11.jpeg" alt="Kandıra Doğa 1" loading="lazy"></div>
+            <div class="gallery-item"><img src="https://raw.githubusercontent.com/berkingcreator/ertanuluturk/main/foto22.jpeg" alt="Kandıra Doğa 2" loading="lazy"></div>
+            <div class="gallery-item"><img src="https://raw.githubusercontent.com/berkingcreator/ertanuluturk/main/foto33.jpeg" alt="Kandıra Doğa 3" loading="lazy"></div>
+            <div class="gallery-item"><img src="https://raw.githubusercontent.com/berkingcreator/ertanuluturk/main/foto44.jpeg" alt="Kandıra Doğa 4" loading="lazy"></div>
+        </div>
+    </div>
+
+    <footer class="premium-footer">
+        <div class="footer-container">
+            <div class="footer-brand"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"><p>Kocaeli Kandıra bölgesindeki tarlalarınız, arsalarınız ve yatırımlarınız için en doğru adres.</p></div>
+            <div class="footer-links"><h4>Kurumsal</h4><ul><li><a href="index.html">Ana Sayfa</a></li><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="arsalar.html">Arsalar</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+            <div class="footer-links"><h4>İletişim</h4><ul><li><a href="tel:+905316337164">+90 531 633 71 64</a></li><li>Kandıra / Kocaeli</li></ul></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 Ertan Ulutürk. | Powered by: <span><a href="https://www.ybg13.com" target="_blank">YBG13™</a></span></p></div>
+    </footer>
+
+    <script>
+        document.getElementById('mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+            this.querySelector('i').classList.toggle('fa-bars');
+            this.querySelector('i').classList.toggle('fa-times');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detayı | Ertan Ulutürk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .detail-container { max-width: 1000px; margin: 120px auto 60px; padding: 0 20px; }
+        
+        /* Geri Dön Butonu */
+        .back-btn { display: inline-flex; align-items: center; gap: 10px; color: var(--primary-color); text-decoration: none; font-weight: 700; font-size: 1.1rem; margin-bottom: 25px; padding: 10px 20px; background: white; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: var(--transition); border: 1px solid #eee; }
+        .back-btn:hover { background: var(--secondary-color); color: white; transform: translateX(-5px); }
+
+        /* Slider Tasarımı */
+        .slider-wrapper { position: relative; width: 100%; height: 500px; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); background: #000; margin-bottom: 30px; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .slide.active { opacity: 1; z-index: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Slider Butonları */
+        .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(26, 37, 47, 0.7); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; z-index: 10; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .slider-btn:hover { background: var(--secondary-color); }
+        .prev-btn { left: 20px; }
+        .next-btn { right: 20px; }
+
+        /* İçerik Tasarımı */
+        .detail-content { background: white; padding: 40px; border-radius: 20px; box-shadow: var(--shadow); }
+        .detail-title { font-size: 2.2rem; color: var(--primary-color); margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .detail-desc { font-size: 1.1rem; color: #555; white-space: pre-wrap; margin-bottom: 30px; line-height: 1.8; }
+        .detail-loader { text-align: center; padding: 100px; font-size: 1.5rem; color: var(--primary-color); }
+
+        @media screen and (max-width: 768px) { .slider-wrapper { height: 300px; } .detail-title { font-size: 1.8rem; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="logo"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"></a>
+        <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Ana Sayfa</a></li>
+            <li><a href="hakkimizda.html">Hakkımızda</a></li>
+            <li><a href="arsalar.html" class="active">Arsalar</a></li>
+            <li><a href="iletisim.html">İletişim</a></li>
+        </ul>
+    </nav>
+
+    <div class="detail-container">
+        <a href="arsalar.html" class="back-btn"><i class="fas fa-arrow-left"></i> Tüm İlanlara Dön</a>
+        
+        <div id="contentArea">
+            <div class="detail-loader"><i class="fas fa-spinner fa-spin"></i> İlan Detayları Yükleniyor...</div>
+        </div>
+    </div>
+
+    <footer class="premium-footer">
+        <div class="footer-container">
+            <div class="footer-brand"><img src="https://ertanuluturk.com/assets/images/ertan.svg" alt="Logo"><p>Kocaeli Kandıra bölgesindeki yatırımlarınız için en doğru adres.</p></div>
+            <div class="footer-links"><h4>Kurumsal</h4><ul><li><a href="index.html">Ana Sayfa</a></li><li><a href="hakkimizda.html">Hakkımızda</a></li><li><a href="arsalar.html">Arsalar</a></li><li><a href="iletisim.html">İletişim</a></li></ul></div>
+            <div class="footer-links"><h4>İletişim</h4><ul><li><a href="tel:+905316337164">+90 531 633 71 64</a></li><li>Kandıra / Kocaeli</li></ul></div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Ertan Ulutürk. | Powered by <span style="color: var(--secondary-color); font-weight: 600;">YBG13™</span></p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwfEYe0JztVcatqsbI6vUmjizJBaSKpYQ",
+            authDomain: "messi-2704f.firebaseapp.com",
+            projectId: "messi-2704f",
+            storageBucket: "messi-2704f.firebasestorage.app",
+            messagingSenderId: "605613457448",
+            appId: "1:605613457448:web:5d3385117726fd773d751d",
+            measurementId: "G-7CXNV0Y2W0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = urlParams.get('id');
+
+        async function loadDetail() {
+            const contentArea = document.getElementById('contentArea');
+            if(!docId) { contentArea.innerHTML = '<h2 style="text-align:center; margin-top:50px;">İlan bulunamadı!</h2>'; return; }
+
+            try {
+                const docRef = doc(db, "arsalar", docId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    let sliderHTML = '';
+                    
+                    if(data.images && data.images.length > 0) {
+                        sliderHTML += `<div class="slider-wrapper">`;
+                        data.images.forEach((img, index) => {
+                            let activeClass = index === 0 ? 'active' : '';
+                            sliderHTML += `<div class="slide ${activeClass}"><img src="${img}" alt="Arsa Fotoğrafı"></div>`;
+                        });
+                        if(data.images.length > 1) {
+                            sliderHTML += `
+                                <button class="slider-btn prev-btn" onclick="changeSlide(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <button class="slider-btn next-btn" onclick="changeSlide(1)"><i class="fas fa-chevron-right"></i></button>
+                            `;
+                        }
+                        sliderHTML += `</div>`;
+                    } else {
+                        sliderHTML = `<img src="https://via.placeholder.com/1000x500?text=Gorsel+Yok" style="width:100%; border-radius:20px; margin-bottom:30px;">`;
+                    }
+
+                    const wpMessage = encodeURIComponent(`Merhaba Ertan Bey, sitenizdeki "${data.title}" başlıklı ilanı inceledim, detaylı bilgi alabilir miyim?`);
+                    
+                    contentArea.innerHTML = `
+                        ${sliderHTML}
+                        <div class="detail-content">
+                            <h1 class="detail-title">${data.title}</h1>
+                            <p class="detail-desc">${data.description}</p>
+                            <a href="https://wa.me/905316337164?text=${wpMessage}" target="_blank" class="btn-primary btn-wp" style="font-size:1.2rem; padding: 20px;">
+                                <i class="fab fa-whatsapp"></i> Bu İlan İçin Fiyat ve Bilgi Al
+                            </a>
+                        </div>
+                    `;
+
+                    if(data.images && data.images.length > 1) initSlider();
+
+                } else {
+                    contentArea.innerHTML = '<h2 style="text-align:center; color:red;">Bu ilan yayından kaldırılmış.</h2>';
+                }
+            } catch (error) {
+                contentArea.innerHTML = '<h2 style="text-align:center; color:red;">Veritabanı hatası.</h2>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDetail);
+        document.getElementById('mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+    
+    <script>
+        let currentSlide = 0;
+        let slideInterval;
+
+        function initSlider() { slideInterval = setInterval(() => { changeSlide(1); }, 1500); }
+        function changeSlide(direction) {
+            const slides = document.querySelectorAll('.slide');
+            if(slides.length === 0) return;
+            clearInterval(slideInterval);
+            slideInterval = setInterval(() => { changeSlide(1); }, 1500);
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + direction + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+    </script>
+</body>
+</html>
