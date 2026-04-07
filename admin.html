@@ -6,11 +6,80 @@
     <title>Ertan Ulutürk Yönetim Paneli | YBG13™ Vanguard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <style>
+        body { background-color: #f4f7f6; display: flex; flex-direction: column; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        #loginScreen { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { background: white; padding: 50px 40px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); width: 100%; max-width: 450px; text-align: center; border: 1px solid #eee; }
+        .input-field { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; transition: 0.3s; margin-bottom: 15px; text-align: center; font-weight: 500; }
+        .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+        .btn-login { width: 100%; background: #4f46e5; color: white; padding: 15px; border-radius: 12px; font-weight: 700; transition: 0.3s; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
+        .btn-login:hover { background: #4338ca; transform: translateY(-2px); }
+        #dashboard { display: none; padding: 40px; }
+        .listing-box { background: white; padding: 20px; border-radius: 20px; border: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; transition: 0.3s; }
+        .listing-box:hover { transform: translateX(5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .listing-info { display: flex; align-items: center; gap: 15px; }
+        .listing-info img { width: 60px; height: 60px; object-cover; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen">
+        <div class="login-box">
+            <div class="mb-8">
+                <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Ertan Ulutürk</h2>
+                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">YBG13™ Vanguard v4.0</p>
+            </div>
+            
+            <input type="email" id="adminEmail" placeholder="Yönetici E-Posta" class="input-field">
+            <input type="password" id="adminPass" placeholder="Erişim Şifresi" class="input-field tracking-widest">
+            
+            <button onclick="login()" id="loginBtn" class="btn-login">Sistemi Doğrula</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="max-w-6xl mx-auto w-full">
+        <div class="flex justify-between items-center mb-10 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800">İlan Yönetimi</h1>
+                <p class="text-indigo-500 text-[10px] font-bold uppercase tracking-widest">Gayrimenkul Portföy Kontrolü</p>
+            </div>
+            <button onclick="logout()" class="text-gray-400 hover:text-red-500 font-bold transition flex items-center gap-2">
+                <i class="fas fa-power-off"></i> Çıkış Yap
+            </button>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm sticky top-10">
+                    <h3 class="font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-indigo-500"></i> Yeni İlan Ekle
+                    </h3>
+                    <input type="text" id="newTitle" placeholder="İlan Başlığı" class="input-field text-left">
+                    <textarea id="newDesc" placeholder="İlan Detayları..." class="input-field text-left h-32 resize-none"></textarea>
+                    
+                    <input type="file" id="fileInp" multiple class="hidden">
+                    <button onclick="document.getElementById('fileInp').click()" class="w-full mb-4 py-4 border-2 border-dashed border-indigo-100 rounded-xl text-indigo-500 font-bold text-sm hover:bg-indigo-50 transition">
+                        <i class="fas fa-camera mr-2"></i> Fotoğrafları Seç
+                    </button>
+                    <div id="previews" class="flex flex-wrap gap-2 mb-6"></div>
+
+                    <button onclick="saveProduct()" id="saveBtn" class="btn-login bg-gray-900 shadow-none hover:bg-black">İlanı Yayınla</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div id="productGrid">
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        // 🛡️ Firebase Auth Modülleri
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -25,13 +94,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        let tempImages = [];
 
-        window.db = db;
-        window.auth = auth;
-        window.fs = { collection, addDoc, getDocs, deleteDoc, doc };
-        window.authActions = { signInWithEmailAndPassword, signOut };
-
-        // 🛡️ Oturum Yönetimi
+        // OTURUM TAKİBİ
         onAuthStateChanged(auth, (user) => {
             const loginScreen = document.getElementById('loginScreen');
             const dashboard = document.getElementById('dashboard');
@@ -44,126 +109,95 @@
                 dashboard.style.display = 'none';
             }
         });
-    </script>
 
-    <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .login-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; border: 1px solid #e2e8f0; }
-        .input-field { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #cbd5e1; outline: none; transition: 0.3s; margin-bottom: 16px; }
-        .input-field:focus { border-color: #4f46e5; ring: 2px; ring-color: #818cf8; }
-        .btn-primary { width: 100%; background: #4f46e5; color: white; padding: 12px; border-radius: 12px; font-weight: 600; transition: 0.3s; }
-        .btn-primary:hover { background: #4338ca; transform: translateY(-1px); }
-        .listing-card { background: white; border-radius: 16px; padding: 16px; border: 1px solid #e2e8f0; transition: 0.3s; }
-        .listing-card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-    </style>
-</head>
-<body>
-
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-6">
-        <div class="login-card text-center">
-            <div class="mb-6">
-                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-4">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-800">Ertan Ulutürk</h2>
-                <p class="text-slate-500 text-sm">YBG13™ Güvenli Giriş Paneli</p>
-            </div>
-            <input type="email" id="adminEmail" placeholder="E-posta adresi" class="input-field text-center">
-            <input type="password" id="adminPass" placeholder="Şifre" class="input-field text-center">
-            <button onclick="checkAdmin()" id="loginBtn" class="btn-primary">Giriş Yap</button>
-        </div>
-    </div>
-
-    <div id="dashboard" class="hidden p-8 max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tight">İlan Yönetimi</h1>
-                <p class="text-slate-500 text-sm">Ertan Ulutürk Gayrimenkul Portföyü</p>
-            </div>
-            <button onclick="logout()" class="bg-slate-200 hover:bg-red-100 hover:text-red-600 p-3 rounded-xl transition text-slate-600">
-                <i class="fas fa-power-off"></i> Güvenli Çıkış
-            </button>
-        </div>
-
-        <div class="grid lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm sticky top-8">
-                    <h3 class="font-bold text-slate-800 mb-4">Yeni İlan Ekle</h3>
-                    <input type="text" id="newTitle" placeholder="İlan Başlığı" class="input-field">
-                    <textarea id="newDesc" placeholder="İlan Açıklaması..." class="input-field h-32 resize-none"></textarea>
-                    
-                    <input type="file" id="fileInp" multiple class="hidden">
-                    <button onclick="document.getElementById('fileInp').click()" class="w-full mb-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 text-sm hover:bg-slate-50 transition">
-                        <i class="fas fa-image mr-2"></i> Fotoğraf Yükle
-                    </button>
-                    <div id="previews" class="flex flex-wrap gap-2 mb-4"></div>
-
-                    <button onclick="saveProduct()" id="saveBtn" class="btn-primary bg-slate-900 hover:bg-black">İlanı Yayınla</button>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2">
-                <div id="productGrid" class="grid sm:grid-cols-2 gap-4">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let tempImages = [];
-
-        async function checkAdmin() {
+        // FONKSİYONLAR
+        window.login = async () => {
             const email = document.getElementById('adminEmail').value;
             const pass = document.getElementById('adminPass').value;
             const btn = document.getElementById('loginBtn');
+            if (!email || !pass) return alert('Lütfen bilgileri doldurun.');
 
-            if(!email || !pass) return alert("Bilgileri doldurun.");
-            
-            btn.innerText = "DOĞRULANIYOR...";
             btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Doğrulanıyor...';
 
             try {
-                await window.authActions.signInWithEmailAndPassword(window.auth, email, pass);
+                await signInWithEmailAndPassword(auth, email, pass);
             } catch (error) {
-                alert("Hatalı Giriş! Yetkisiz deneme engellendi.");
-                console.error(error);
+                alert('Erişim Reddedildi! Geçersiz kimlik bilgileri.');
             } finally {
-                btn.innerText = "Giriş Yap";
                 btn.disabled = false;
+                btn.innerText = 'Sistemi Doğrula';
             }
-        }
+        };
 
-        async function logout() {
-            if(confirm('Oturum kapatılsın mı?')) {
-                await window.authActions.signOut(window.auth);
-            }
-        }
+        window.logout = async () => {
+            if(confirm('Güvenli çıkış yapılsın mı?')) await signOut(auth);
+        };
 
-        async function loadProducts() {
+        window.loadProducts = async () => {
             const grid = document.getElementById('productGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Yükleniyor...</div>';
+            grid.innerHTML = '<div class="text-center py-10 text-gray-400">Veriler taranıyor...</div>';
             
             try {
-                const snap = await window.fs.getDocs(window.fs.collection(window.db, "arsalar"));
+                const snap = await getDocs(collection(db, "arsalar"));
                 grid.innerHTML = '';
                 snap.forEach(d => {
                     const p = d.data();
                     const img = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/150';
-                    const card = document.createElement('div');
-                    card.className = 'listing-card flex flex-col';
-                    card.innerHTML = `
-                        <img src="${img}" class="w-full h-40 object-cover rounded-lg mb-4 bg-slate-100">
-                        <h4 class="font-bold text-slate-800 truncate">${p.title}</h4>
-                        <p class="text-xs text-slate-500 mb-4 line-clamp-2">${p.desc}</p>
-                        <button onclick="deleteProduct('${d.id}')" class="mt-auto text-red-500 text-sm font-bold text-left hover:text-red-700">
-                            <i class="fas fa-trash-alt mr-1"></i> İlanı Sil
+                    const div = document.createElement('div');
+                    div.className = "listing-box group";
+                    div.innerHTML = `
+                        <div class="listing-info">
+                            <img src="${img}" alt="Arsa">
+                            <div>
+                                <span class="text-[9px] bg-indigo-50 text-indigo-600 px-2 py-1 rounded-md font-bold mb-1 inline-block">AKTİF İLAN</span>
+                                <h3 class="font-bold text-gray-800 text-sm line-clamp-1">${p.title}</h3>
+                            </div>
+                        </div>
+                        <button onclick="deleteProduct('${d.id}')" class="text-gray-300 hover:text-red-500 transition px-4 py-2">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     `;
-                    grid.appendChild(card);
+                    grid.appendChild(div);
                 });
-            } catch (error) { console.error(error); }
-        }
+            } catch (e) { console.error(e); }
+        };
 
+        window.saveProduct = async () => {
+            const t = document.getElementById('newTitle').value;
+            const d = document.getElementById('newDesc').value;
+            const btn = document.getElementById('saveBtn');
+
+            if(!t || tempImages.length === 0) return alert('Başlık ve en az bir fotoğraf zorunludur.');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yayınlanıyor...';
+
+            try {
+                await addDoc(collection(db, "arsalar"), {
+                    title: t, desc: d, images: tempImages, date: new Date().toISOString()
+                });
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newDesc').value = '';
+                tempImages = [];
+                document.getElementById('previews').innerHTML = '';
+                loadProducts();
+                alert('İlan başarıyla yayınlandı.');
+            } catch (err) { alert('Hata oluştu!'); }
+            finally {
+                btn.disabled = false;
+                btn.innerHTML = 'İlanı Yayınla';
+            }
+        };
+
+        window.deleteProduct = async (id) => {
+            if(confirm('Bu ilanı kalıcı olarak silmek istiyor musunuz?')) {
+                await deleteDoc(doc(db, "arsalar", id));
+                loadProducts();
+            }
+        };
+
+        // Görsel Seçme & Önizleme
         document.getElementById('fileInp').onchange = (e) => {
             Array.from(e.target.files).forEach(f => {
                 const r = new FileReader();
@@ -171,51 +205,12 @@
                     tempImages.push(ev.target.result);
                     const i = document.createElement('img');
                     i.src = ev.target.result;
-                    i.className = "w-12 h-12 object-cover rounded-lg border";
+                    i.className = "w-14 h-14 object-cover rounded-xl border border-gray-100 shadow-sm";
                     document.getElementById('previews').appendChild(i);
                 };
                 r.readAsDataURL(f);
             });
         };
-
-        async function saveProduct() {
-            const t = document.getElementById('newTitle').value;
-            const d = document.getElementById('newDesc').value;
-            const btn = document.getElementById('saveBtn');
-
-            if(!t || tempImages.length === 0) return alert("Başlık ve görsel zorunludur.");
-            
-            btn.innerText = "YAYINLANIYOR...";
-            btn.disabled = true;
-
-            try {
-                await window.fs.addDoc(window.fs.collection(window.db, "arsalar"), {
-                    title: t, desc: d, images: tempImages, date: new Date().toISOString()
-                });
-                tempImages = [];
-                document.getElementById('previews').innerHTML = '';
-                document.getElementById('newTitle').value = '';
-                document.getElementById('newDesc').value = '';
-                loadProducts();
-                alert("İlan yayına alındı.");
-            } catch (err) { alert("Hata oluştu."); }
-            finally {
-                btn.innerText = "İlanı Yayınla";
-                btn.disabled = false;
-            }
-        }
-
-        async function deleteProduct(id) {
-            if(confirm('İlan silinecek, emin misiniz?')) {
-                await window.fs.deleteDoc(window.fs.doc(window.db, "arsalar", id));
-                loadProducts();
-            }
-        }
-
-        window.checkAdmin = checkAdmin;
-        window.saveProduct = saveProduct;
-        window.deleteProduct = deleteProduct;
-        window.logout = logout;
     </script>
 </body>
 </html>
